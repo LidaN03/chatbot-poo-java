@@ -62,7 +62,7 @@ if "history" not in st.session_state:
 
 def generar_codigo_java(prompt_usuario):
     url = "https://api-inference.huggingface.co/models/bigcode/starcoder"
-    headers = {"Authorization": "Bearer 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"}  # Reemplaza con tu token válido
+    headers = {"Authorization": "Bearer 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"}  # Reemplaza con tu token válido
 
     prompt = f"// Java\n// {prompt_usuario}\npublic class "
 
