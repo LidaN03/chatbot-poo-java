@@ -62,19 +62,32 @@ if "history" not in st.session_state:
 
 def generar_codigo_java(prompt_usuario):
     url = "https://api-inference.huggingface.co/models/bigcode/starcoder"
-    headers = {"Authorization": "Bearer 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"}  # Reemplazado con tu token real
+    headers = {"Authorization": "Bearer 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"}  # Reemplaza con tu token válido
+
+    prompt = f"// Java\n// {prompt_usuario}\npublic class "
 
     payload = {
-        "inputs": f"{prompt_usuario} en Java:",
-        "parameters": {"max_new_tokens": 150}
+        "inputs": prompt,
+        "parameters": {
+            "max_new_tokens": 200,
+            "temperature": 0.2,
+            "top_p": 0.95,
+            "do_sample": True,
+            "return_full_text": False
+        }
     }
 
     respuesta = requests.post(url, headers=headers, json=payload)
+
     if respuesta.status_code == 200:
         resultado = respuesta.json()
-        return resultado[0]["generated_text"].split("en Java:")[1].strip()
+        try:
+            generated = resultado[0]["generated_text"]
+            return generated.strip()
+        except (KeyError, IndexError):
+            return "Lo siento, no pude generar un código válido en este momento."
     else:
-        return "Lo siento, no pude generar un código en este momento."
+        return f"Error {respuesta.status_code}: no se pudo contactar al modelo de Hugging Face."
 
 def buscar_respuesta_clara(pregunta):
     if "ejemplo" in pregunta.lower() or "programa" in pregunta.lower():
@@ -101,7 +114,7 @@ def buscar_respuesta_clara(pregunta):
             for r in resultados:
                 url = r.get("href", "")
                 if url:
-                    return f"{respuesta}\n\nFuente: [{url}]({url})"
+                    return f" {respuesta}\n\nFuente: [{url}]({url})"
 
     with DDGS() as ddgs:
         resultados = list(ddgs.text(keywords=pregunta, max_results=5))
