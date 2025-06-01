@@ -75,9 +75,12 @@ def buscar_respuesta_clara(pregunta):
             dominio_valido = any(site in url for site in sitios_confiables)
 
             if dominio_valido and any(palabra in texto.lower() for palabra in ["una clase", "java", "herencia", "polimorfismo", "interfaz"]):
-                if len(texto) > 10000:
-                    texto = texto[:10000].rsplit(".", 1)[0] + "."
-                return f"{texto}\n\n🔗 Fuente: [{url}]({url})"
+                if len(texto) > 1000:
+                    texto = texto[:1000].rsplit(".", 1)[0] + "."
+                return f"**Respuesta**: {texto}\n\n🔗 Fuente: [{url}]({url})"
+    
+    return "Lo siento, no encontré una respuesta clara en los sitios educativos confiables. ¿Puedes reformular tu pregunta?"
+
     
     return "Lo siento, no encontré una respuesta clara en los sitios educativos confiables. ¿Puedes reformular tu pregunta?"
 
