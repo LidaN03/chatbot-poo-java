@@ -24,13 +24,13 @@ st.markdown("""
         color: #333;
     }
     .user {
-        background-color: #e0f7fa;
+        background-color: #d0f0f3;
         align-self: flex-end;
         text-align: right;
         margin-left: auto;
     }
     .bot {
-        background-color: #ffe6f2;
+        background-color: #fce6ef;
         align-self: flex-start;
         text-align: left;
         margin-right: auto;
@@ -60,14 +60,16 @@ if "history" not in st.session_state:
     st.session_state.history = []
 
 def buscar_respuesta_clara(pregunta):
+    dominios_permitidos = ["geeksforgeeks.org", "tutorialspoint.com", "javadesdecero.es"]
     with DDGS() as ddgs:
         resultados = list(ddgs.text(keywords=pregunta, max_results=5))
         for r in resultados:
-            texto = r["body"].strip()
-            if any(palabra in texto.lower() for palabra in ["una clase", "java", "herencia", "polimorfismo", "interfaz"]):
-                # Limita a 1000 caracteres
-                return f" {texto[:10000]}"
-        return "Lo siento, no encontré una respuesta clara. ¿Puedes reformular tu pregunta?"
+            url = r.get("href", "")
+            texto = r.get("body", "").strip()
+            if any(dominio in url for dominio in dominios_permitidos):
+                if any(palabra in texto.lower() for palabra in ["una clase", "java", "herencia", "polimorfismo", "interfaz"]):
+                    return f"{texto[:10000]}\n\nFuente: {url}"
+        return "Lo siento, no encontré una respuesta clara en sitios confiables. ¿Puedes reformular tu pregunta?"
 
 user_input = st.text_input("Escribe tu mensaje:", "")
 
@@ -84,4 +86,5 @@ if st.button("Enviar") and user_input:
 for autor, mensaje in st.session_state.history:
     clase = "user" if autor == "user" else "bot"
     st.markdown(f'<div class="chat-bubble {clase}">{mensaje}</div>', unsafe_allow_html=True)
+
 
