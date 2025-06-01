@@ -1,8 +1,5 @@
 import streamlit as st
-import openai
 
-# Configura la clave de la API de OpenAI
-openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # Título y diseño
 st.set_page_config(page_title="Chatbot POO Java", layout="centered")
