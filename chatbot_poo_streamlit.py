@@ -1,4 +1,5 @@
 import streamlit as st
+import requests
 from duckduckgo_search import DDGS
 import time
 
@@ -59,7 +60,27 @@ st.subheader("Pregúntame sobre clases, herencia, ejemplos de código en Java y 
 if "history" not in st.session_state:
     st.session_state.history = []
 
+def generar_codigo_java(prompt_usuario):
+    url = "https://api-inference.huggingface.co/models/bigcode/starcoder"
+    headers = {"Authorization": "Bearer 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"}  # Reemplaza con tu token real
+
+    payload = {
+        "inputs": f"{prompt_usuario} en Java:",
+        "parameters": {"max_new_tokens": 150}
+    }
+
+    respuesta = requests.post(url, headers=headers, json=payload)
+    if respuesta.status_code == 200:
+        resultado = respuesta.json()
+        return resultado[0]["generated_text"].split("en Java:")[1].strip()
+    else:
+        return "Lo siento, no pude generar un código en este momento."
+
 def buscar_respuesta_clara(pregunta):
+    if "ejemplo" in pregunta.lower() or "programa" in pregunta.lower():
+        codigo = generar_codigo_java(pregunta)
+        return f"**Ejemplo de código generado:**\n```java\n{codigo}\n```"
+
     conceptos_directos = {
         "herencia": "La herencia en programación orientada a objetos permite que una clase herede atributos y métodos de otra clase.",
         "polimorfismo": "El polimorfismo permite que objetos de diferentes clases sean tratados como objetos de una clase común.",
@@ -80,7 +101,7 @@ def buscar_respuesta_clara(pregunta):
             for r in resultados:
                 url = r.get("href", "")
                 if url:
-                    return f"{respuesta}\n\nFuente: [{url}]({url})"
+                    return f"**Respuesta**: {respuesta}\n\nFuente: [{url}]({url})"
 
     with DDGS() as ddgs:
         resultados = list(ddgs.text(keywords=pregunta, max_results=5))
@@ -88,9 +109,9 @@ def buscar_respuesta_clara(pregunta):
             url = r.get("href", "")
             texto = r.get("body", "").strip()
             if any(palabra in texto.lower() for palabra in ["una clase", "java", "herencia", "polimorfismo", "interfaz"]):
-                if len(texto) > 10000:
-                    texto = texto[:10000].rsplit(".", 1)[0] + "."
-                return f" {texto}\n\nFuente: [{url}]({url})"
+                if len(texto) > 1000:
+                    texto = texto[:1000].rsplit(".", 1)[0] + "."
+                return f"**Respuesta**: {texto}\n\nFuente: [{url}]({url})"
         return "Lo siento, no encontré una respuesta clara en sitios confiables. ¿Puedes reformular tu pregunta?"
 
 user_input = st.text_input("Escribe tu mensaje:", "")
@@ -108,3 +129,4 @@ if st.button("Enviar") and user_input:
 for autor, mensaje in st.session_state.history:
     clase = "user" if autor == "user" else "bot"
     st.markdown(f'<div class="chat-bubble {clase}">{mensaje}</div>', unsafe_allow_html=True)
+
