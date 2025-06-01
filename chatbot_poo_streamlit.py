@@ -62,7 +62,12 @@ if "history" not in st.session_state:
 
 def generar_codigo_java(prompt_usuario):
     url = "https://api-inference.huggingface.co/models/Salesforce/codegen-350M-mono"
-    headers = {"Authorization": "Bearer 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"}  # Reemplaza con tu token válido
+    headers = {"Authorization": "Bearerhf_hCmOlkvxErtZsTmCcNSlAtuhQkQQdPzOGg "}  # Reemplaza con tu token válido
+
+    # Verifica disponibilidad del modelo
+    estado = requests.get(url, headers=headers)
+    if estado.status_code != 200:
+        return f"Error {estado.status_code}: El modelo de Hugging Face no está disponible. Intenta más tarde."
 
     prompt = f"// Java\n// {prompt_usuario}\npublic class "
 
@@ -74,6 +79,21 @@ def generar_codigo_java(prompt_usuario):
             "top_p": 0.95,
             "do_sample": True,
             "return_full_text": False
+        }
+    }
+
+    respuesta = requests.post(url, headers=headers, json=payload)
+
+    if respuesta.status_code == 200:
+        resultado = respuesta.json()
+        try:
+            generated = resultado[0]["generated_text"]
+            return generated.strip()
+        except (KeyError, IndexError):
+            return "Lo siento, no pude generar un código válido en este momento."
+    else:
+        return f"Error {respuesta.status_code}: no se pudo contactar al modelo de Hugging Face."
+
         }
     }
 
