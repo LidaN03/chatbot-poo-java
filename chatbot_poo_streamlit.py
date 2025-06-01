@@ -62,7 +62,7 @@ if "history" not in st.session_state:
 
 def generar_codigo_java(prompt_usuario):
     url = "https://api-inference.huggingface.co/models/bigcode/starcoder"
-    headers = {"Authorization": "Bearer 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"}  # Reemplaza con tu token real
+    headers = {"Authorization": "Bearer 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"}  # Reemplazado con tu token real
 
     payload = {
         "inputs": f"{prompt_usuario} en Java:",
@@ -79,7 +79,7 @@ def generar_codigo_java(prompt_usuario):
 def buscar_respuesta_clara(pregunta):
     if "ejemplo" in pregunta.lower() or "programa" in pregunta.lower():
         codigo = generar_codigo_java(pregunta)
-        return f"Ejemplo de código generado:\n```java\n{codigo}\n```"
+        return f"**Ejemplo de código generado:**\n```java\n{codigo}\n```"
 
     conceptos_directos = {
         "herencia": "La herencia en programación orientada a objetos permite que una clase herede atributos y métodos de otra clase.",
@@ -101,7 +101,7 @@ def buscar_respuesta_clara(pregunta):
             for r in resultados:
                 url = r.get("href", "")
                 if url:
-                    return f" {respuesta}\n\nFuente: [{url}]({url})"
+                    return f"{respuesta}\n\nFuente: [{url}]({url})"
 
     with DDGS() as ddgs:
         resultados = list(ddgs.text(keywords=pregunta, max_results=5))
@@ -129,4 +129,3 @@ if st.button("Enviar") and user_input:
 for autor, mensaje in st.session_state.history:
     clase = "user" if autor == "user" else "bot"
     st.markdown(f'<div class="chat-bubble {clase}">{mensaje}</div>', unsafe_allow_html=True)
-
