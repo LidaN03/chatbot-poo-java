@@ -80,7 +80,7 @@ def buscar_respuesta_clara(pregunta):
             for r in resultados:
                 url = r.get("href", "")
                 if url:
-                    return f"**Respuesta**: {respuesta}\n\nFuente: [{url}]({url})"
+                    return f"{respuesta}\n\nFuente: [{url}]({url})"
 
     with DDGS() as ddgs:
         resultados = list(ddgs.text(keywords=pregunta, max_results=5))
