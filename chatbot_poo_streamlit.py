@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 
 st.set_page_config(page_title="Chatbot POO Java", layout="centered")
 
+# Imagen del robot (debe estar en la misma carpeta con el nombre correcto)
+st.image("robot_chatbot.jpg", width=100)
 st.markdown("<h2 style='text-align: center;'>Chatbot POO para estudiantes de Java</h2>", unsafe_allow_html=True)
 st.markdown("---")
 
@@ -24,25 +26,27 @@ def buscar_en_web(pregunta):
         else:
             return "No encontré información relevante en la web."
     except Exception as e:
-        return f"Ocurrió un error al intentar buscar en la web: {e}"
+        return f"Ocurrió un error al buscar en la web: {e}"
 
 def responder(mensaje):
     texto = mensaje.lower().strip()
 
-    temas = {
-        "clase": "📘 **Concepto**: Una clase en Java es una plantilla para crear objetos. Puede contener atributos y métodos.",
-        "herencia": "📘 **Concepto**: La herencia permite que una clase hija adquiera atributos y métodos de una clase padre.",
-        "polimorfismo": "📘 **Concepto**: El polimorfismo permite usar una misma interfaz con distintas implementaciones.",
-        "encapsulacion": "📘 **Concepto**: La encapsulación oculta los detalles internos del objeto y expone solo lo necesario."
+    conceptos = {
+        "clase": {
+            "definicion": "📘 **Concepto**: Una clase es un molde para crear objetos. Contiene atributos (variables) y métodos (funciones).",
+            "codigo": '''public class Persona {
+    private String nombre;
+    public void setNombre(String n) {
+        this.nombre = n;
     }
-
-    for clave, explicacion in temas.items():
-        if clave in texto:
-            return explicacion
-
-    if "ejemplo" in texto:
-        ejemplos = {
-            "herencia": """class Animal {
+    public String getNombre() {
+        return nombre;
+    }
+}'''
+        },
+        "herencia": {
+            "definicion": "📘 **Concepto**: La herencia permite que una clase hija adquiera atributos y métodos de una clase padre.",
+            "codigo": '''class Animal {
     void hacerSonido() {
         System.out.println("Sonido genérico");
     }
@@ -51,17 +55,11 @@ class Perro extends Animal {
     void hacerSonido() {
         System.out.println("Guau!");
     }
-}""",
-            "clase": """public class Persona {
-    private String nombre;
-    public void setNombre(String n) {
-        this.nombre = n;
-    }
-    public String getNombre() {
-        return nombre;
-    }
-}""",
-            "polimorfismo": """class Animal {
+}'''
+        },
+        "polimorfismo": {
+            "definicion": "📘 **Concepto**: El polimorfismo permite usar una misma interfaz con distintas implementaciones.",
+            "codigo": '''class Animal {
     void hacerSonido() {
         System.out.println("Sonido genérico");
     }
@@ -76,47 +74,51 @@ public class Main {
         Animal a = new Gato();
         a.hacerSonido();
     }
-}"""
+}'''
         }
-        for clave, codigo in ejemplos.items():
-            if clave in texto:
-                return codigo
+    }
+
+    for tema, datos in conceptos.items():
+        if tema in texto:
+            return datos["definicion"], datos["codigo"]
 
     if "class" in texto or "void main" in texto:
         resultado = []
         if "class" in texto:
-            clases = re.findall(r'class\s+(\w+)', texto)
+            clases = re.findall(r'class\\s+(\\w+)', texto)
             if clases:
                 resultado.append(f"🔍 Clases detectadas: {', '.join(clases)}")
         if "extends" in texto:
-            resultado.append("🧬 Herencia detectada.")
-        if "main" in texto and "void" in texto:
+            resultado.append("🧬 Se detectó herencia.")
+        if "main" in texto:
             resultado.append("🧩 Método main() encontrado.")
         if resultado:
-            return "\n".join(resultado)
+            return "🔎 Análisis de código:", "\\n".join(resultado)
         else:
-            return "⚠️ No detecté estructuras clave en tu código."
+            return "⚠️ Código no reconocido.", "No se detectaron patrones Java comunes."
 
-    return buscar_en_web(texto)
+    return buscar_en_web(texto), None
 
-# Entrada de usuario
-with st.container():
-    user_input = st.text_input("Tú:", placeholder="Haz una pregunta o pega tu código Java")
+# Entrada del usuario
+user_input = st.text_input("Tú:", placeholder="Haz una pregunta como '¿Qué es una clase?' o pega tu código...")
 
 if user_input:
     st.session_state.chat.append(("Tú", user_input))
-    respuesta = responder(user_input)
+    respuesta, codigo = responder(user_input)
     st.session_state.chat.append(("Chatbot", respuesta))
+    if codigo:
+        st.session_state.chat.append(("Código", codigo))
 
-# Mostrar conversación estilo chat
+# Mostrar mensajes tipo chat
 for remitente, mensaje in st.session_state.chat:
     if remitente == "Tú":
         st.markdown(
             f"<div style='text-align: right; background-color: #1e88e5; color: white; padding: 10px; border-radius: 10px; margin: 5px;'>"
             f"{mensaje}</div>", unsafe_allow_html=True)
-    else:
+    elif remitente == "Chatbot":
         st.markdown(
-            f"<div style='text-align: left; background-color: #e0f7fa; color: black; padding: 10px; border-radius: 10px; margin: 5px;'>"
+            f"<div style='text-align: left; background-color: #e8f5e9; color: black; padding: 10px; border-radius: 10px; margin: 5px;'>"
             f"{mensaje}</div>", unsafe_allow_html=True)
-
+    elif remitente == "Código":
+        st.code(mensaje, language="java")
 
