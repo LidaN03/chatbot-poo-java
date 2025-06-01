@@ -6,14 +6,14 @@ st.set_page_config(page_title="ChatBot POO", layout="centered")
 st.markdown("""
     <style>
     body {
-        background-color: #f0f4f8;
+        background-color: #fff0f5;
     }
     .main {
         background-color: #ffffff;
         border-radius: 15px;
         padding: 30px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        font-family: 'Segoe UI', sans-serif;
+        font-family: 'Comic Sans MS', cursive, sans-serif;
     }
     .chat-bubble {
         border-radius: 15px;
@@ -21,26 +21,40 @@ st.markdown("""
         margin: 10px 0;
         max-width: 80%;
         font-size: 16px;
+        color: #333;
     }
     .user {
-        background-color: #e6f7ff;
+        background-color: #d0f0fd;
         align-self: flex-end;
         text-align: right;
         margin-left: auto;
     }
     .bot {
-        background-color: #fff0f6;
+        background-color: #ffe6f2;
         align-self: flex-start;
         text-align: left;
         margin-right: auto;
     }
+    .stButton>button {
+        background-color: #ffb6c1;
+        color: white;
+        font-weight: bold;
+        border-radius: 8px;
+        border: none;
+        padding: 10px 20px;
+    }
+    .stTextInput>div>input {
+        border-radius: 10px;
+        border: 1px solid #ffc0cb;
+        padding: 10px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-st.image("robot_chatbot.png", width=120)
+st.image("robot_chatbot.png", width=100)
 
-st.title("Asistente de POO con Java")
-st.subheader("Hazme preguntas sobre programación orientada a objetos, clases, herencia, ejemplos en Java y más.")
+st.title("💬 Chatbot POO para estudiantes de Java")
+st.subheader("Pregúntame sobre clases, herencia, ejemplos de código en Java y más. ¡Estoy aquí para ayudarte!")
 
 if "history" not in st.session_state:
     st.session_state.history = []
@@ -65,11 +79,6 @@ if st.button("Enviar") and user_input:
             respuesta = f"Ocurrió un error al buscar información: {str(e)}"
 
     st.session_state.history.append(("bot", respuesta))
-
-# Mostrar historial de chat
-for autor, mensaje in st.session_state.history:
-    clase = "user" if autor == "user" else "bot"
-    st.markdown(f'<div class="chat-bubble {clase}">{mensaje}</div>', unsafe_allow_html=True)
 
 # Mostrar historial de chat
 for autor, mensaje in st.session_state.history:
