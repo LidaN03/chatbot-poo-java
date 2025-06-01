@@ -61,14 +61,24 @@ if "history" not in st.session_state:
 
 def buscar_respuesta_clara(pregunta):
     with DDGS() as ddgs:
-        resultados = list(ddgs.text(keywords=pregunta, max_results=5))
+        resultados = list(ddgs.text(keywords=pregunta, max_results=10))
         for r in resultados:
             texto = r["body"].strip()
-            if any(palabra in texto.lower() for palabra in ["una clase", "java", "herencia", "polimorfismo", "interfaz"]):
-                if len(texto) > 400:
-                    texto = texto[:400] + "..."
-                return f"**Respuesta**: {texto}"
-        return "Lo siento, no encontré una respuesta clara. ¿Puedes reformular tu pregunta?"
+
+            # Filtrar respuestas irrelevantes o promocionales
+            if any(phrase in texto.lower() for phrase in [
+                "haz clic", "descargar", "continúa leyendo", "pulsando aquí", "este post"
+            ]):
+                continue
+
+            # Verifica si contiene términos útiles
+            if any(palabra in texto.lower() for palabra in [
+                "public class", "extends", "interface", "set", "get", "atributos", "métodos", "java", "poo"
+            ]):
+                return f"**Respuesta concreta**:\n\n```java\n{texto}```" if "public class" in texto else f"**Respuesta**: {texto}"
+
+    return "Lo siento, no encontré una respuesta clara. ¿Puedes reformular tu pregunta?"
+
 
 user_input = st.text_input("Escribe tu mensaje:", "")
 
