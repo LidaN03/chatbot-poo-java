@@ -94,8 +94,8 @@ def generar_codigo_java(prompt_usuario):
     else:
         return f"Error {respuesta.status_code}: no se pudo contactar al modelo de Hugging Face."
 
-        }
-    }
+        
+    
 
     respuesta = requests.post(url, headers=headers, json=payload)
 
