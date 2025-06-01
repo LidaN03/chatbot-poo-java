@@ -60,16 +60,27 @@ if "history" not in st.session_state:
     st.session_state.history = []
 
 def buscar_respuesta_clara(pregunta):
+    sitios_confiables = [
+        "campusmvp.es",
+        "genbeta.com",
+        "alianza.bunam.unam.mx",
+        "webdesigncusco.com"
+    ]
+    
     with DDGS() as ddgs:
-        resultados = list(ddgs.text(keywords=pregunta, max_results=5))
+        resultados = list(ddgs.text(keywords=pregunta, max_results=10))
         for r in resultados:
             url = r.get("href", "")
             texto = r.get("body", "").strip()
-            if any(palabra in texto.lower() for palabra in ["una clase", "java", "herencia", "polimorfismo", "interfaz"]):
+            dominio_valido = any(site in url for site in sitios_confiables)
+
+            if dominio_valido and any(palabra in texto.lower() for palabra in ["una clase", "java", "herencia", "polimorfismo", "interfaz"]):
                 if len(texto) > 10000:
-                    texto = texto[:1000].rsplit(".", 1)[0] + "."
-                return f"{texto}\n\nFuente: [{url}]({url})"
-        return "Lo siento, no encontré una respuesta clara en sitios confiables. ¿Puedes reformular tu pregunta?"
+                    texto = texto[:10000].rsplit(".", 1)[0] + "."
+                return f"{texto}\n\n🔗 Fuente: [{url}]({url})"
+    
+    return "Lo siento, no encontré una respuesta clara en los sitios educativos confiables. ¿Puedes reformular tu pregunta?"
+
 
 user_input = st.text_input("Escribe tu mensaje:", "")
 
