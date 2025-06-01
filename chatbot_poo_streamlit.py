@@ -112,6 +112,3 @@ for emisor, mensaje in st.session_state.chat:
     elif emisor == "Código":
         st.code(mensaje, language="java")
 
-       if __name__ == '__main__':
-           import os
-           os.system("streamlit run " + __file__)
