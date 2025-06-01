@@ -60,44 +60,76 @@ st.subheader("Pregúntame sobre clases, herencia, ejemplos de código en Java y 
 if "history" not in st.session_state:
     st.session_state.history = []
 
-def generar_codigo_java(prompt_usuario):
-    url = "https://api-inference.huggingface.co/models/bigcode/santacoder"
-    headers = {
-        "Authorization": "Bearer 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"  # Reemplaza con tu token real
+# Ejemplos predefinidos de código Java
+codigos_java = {
+    "herencia": """```java
+class Animal {
+    void hacerSonido() {
+        System.out.println("Sonido genérico");
+    }
+}
+
+class Perro extends Animal {
+    void hacerSonido() {
+        System.out.println("Guau!");
+    }
+}
+```""",
+    "interfaz": """```java
+interface Vehiculo {
+    void conducir();
+}
+
+class Coche implements Vehiculo {
+    public void conducir() {
+        System.out.println("El coche está en marcha.");
+    }
+}
+```""",
+    "clase abstracta": """```java
+abstract class Figura {
+    abstract void dibujar();
+}
+
+class Circulo extends Figura {
+    void dibujar() {
+        System.out.println("Dibujando un círculo");
+    }
+}
+```""",
+    "sobrecarga": """```java
+class Calculadora {
+    int sumar(int a, int b) {
+        return a + b;
     }
 
-    prompt = f"// Java\n// {prompt_usuario}\npublic class "
-
-    payload = {
-        "inputs": prompt,
-        "parameters": {
-            "max_new_tokens": 200,
-            "temperature": 0.4,
-            "top_p": 0.95,
-            "do_sample": True,
-            "return_full_text": False
-        }
+    double sumar(double a, double b) {
+        return a + b;
     }
+}
+```""",
+    "main": """```java
+public class Principal {
+    public static void main(String[] args) {
+        System.out.println("Hola Mundo");
+    }
+}
+```"""
+}
 
-    respuesta = requests.post(url, headers=headers, json=payload)
-
-    if respuesta.status_code == 200:
-        resultado = respuesta.json()
-        try:
-            generated = resultado[0]["generated_text"]
-            return generated.strip()
-        except (KeyError, IndexError):
-            return "Lo siento, no pude generar un código válido en este momento."
-    elif respuesta.status_code == 401:
-        return "Error 401: Token inválido o sin permisos para este modelo."
-    else:
-        return f"Error {respuesta.status_code}: no se pudo contactar al modelo de Hugging Face."
-
+def generar_codigo_java_local(pregunta):
+    for clave in codigos_java:
+        if clave in pregunta.lower():
+            return codigos_java[clave]
+    return None
 
 def buscar_respuesta_clara(pregunta):
     if "ejemplo" in pregunta.lower() or "programa" in pregunta.lower():
-        codigo = generar_codigo_java(pregunta)
-        return f"**Ejemplo de código generado:**\n```java\n{codigo}\n```"
+        codigo = generar_codigo_java_local(pregunta)
+        if codigo:
+            return f"**Ejemplo de código generado:**\n{codigo}"
+        else:
+            return "Lo siento, no tengo un ejemplo para eso aún. Prueba con 'herencia' o 'interfaz'."
 
     conceptos_directos = {
         "herencia": "La herencia en programación orientada a objetos permite que una clase herede atributos y métodos de otra clase.",
@@ -147,3 +179,4 @@ if st.button("Enviar") and user_input:
 for autor, mensaje in st.session_state.history:
     clase = "user" if autor == "user" else "bot"
     st.markdown(f'<div class="chat-bubble {clase}">{mensaje}</div>', unsafe_allow_html=True)
+
