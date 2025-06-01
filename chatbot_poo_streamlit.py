@@ -66,7 +66,7 @@ def buscar_respuesta_clara(pregunta):
             texto = r["body"].strip()
             if any(palabra in texto.lower() for palabra in ["una clase", "java", "herencia", "polimorfismo", "interfaz"]):
                 # Limita a 1000 caracteres
-                return f"**Respuesta**: {texto[:1000]}"
+                return f" {texto[:10000]}"
         return "Lo siento, no encontré una respuesta clara. ¿Puedes reformular tu pregunta?"
 
 user_input = st.text_input("Escribe tu mensaje:", "")
