@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 st.set_page_config(page_title="Chatbot POO Java", layout="centered")
 
 # Imagen del robot (debe estar en la misma carpeta con el nombre correcto)
-st.image("robot_chatbot.png", width=100)
+st.image("https://raw.githubusercontent.com/LidaN03/chatbot-poo-java/main/robot_chatbot.png", width=100)
 st.markdown("<h2 style='text-align: center;'>Chatbot POO para estudiantes de Java</h2>", unsafe_allow_html=True)
 st.markdown("---")
 
