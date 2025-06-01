@@ -1,65 +1,75 @@
 import streamlit as st
-import re
+import requests
 
-# Configura la página
-st.set_page_config(page_title="Chatbot POO Java", layout="centered")
-
-# Encabezado con imagen de robot (puedes cambiar el URL por otro PNG)
+st.set_page_config(page_title="ChatBot POO", layout="centered")
 st.markdown("""
-    <div style="text-align: center;">
-        <img src="https://i.imgur.com/FNvV6xT.png" width="100"/>
-        <h1 style="color: white; font-family: Arial;">Chatbot POO para estudiantes de Java</h1>
-    </div>
+    <style>
+    body, .stApp {
+        font-family: 'Arial Rounded MT Bold', sans-serif;
+        background-color: #f1f1f1;
+    }
+    .chat-box {
+        background-color: #ffffff;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+    .user-msg {
+        background-color: #d0e8ff;
+        padding: 8px;
+        border-radius: 10px;
+        margin-bottom: 8px;
+    }
+    .bot-msg {
+        background-color: #eeeeee;
+        padding: 8px;
+        border-radius: 10px;
+        margin-bottom: 8px;
+    }
+    </style>
 """, unsafe_allow_html=True)
 
-# Entrada del usuario
-user_input = st.text_input("Haz una pregunta como '¿Qué es una clase?' o pega tu código en Java...")
+st.image("robot_chatbot.png", width=100)
+st.title("🤖 ChatBot de POO y más")
 
-# Función para procesar la entrada del usuario
+# Historial de mensajes si no existe
+def iniciar_historial():
+    if "historial" not in st.session_state:
+        st.session_state.historial = []
+
+def buscar_duckduckgo(pregunta):
+    try:
+        url = f"https://api.duckduckgo.com/?q={pregunta}&format=json&no_redirect=1"
+        respuesta = requests.get(url)
+        datos = respuesta.json()
+        texto = datos.get("Abstract")
+        if texto:
+            return texto
+        else:
+            return "No encontré una respuesta directa, intenta reformular tu pregunta."
+    except Exception as e:
+        return f"Ocurrió un error al buscar: {e}"
+
+# Lógica general del chatbot
 def responder(pregunta):
     pregunta = pregunta.lower()
+    respuesta = buscar_duckduckgo(pregunta)
+    return respuesta
 
-    # Explicador de conceptos
-    if "qué es una clase" in pregunta:
-        return "Concepto: Una clase es un molde para crear objetos. Contiene atributos (variables) y métodos (funciones)."
-    if "herencia" in pregunta and "composición" in pregunta:
-        return "Concepto: La herencia permite que una clase hija herede atributos y métodos de una clase padre. La composición implica que una clase contiene instancias de otras clases."
-    if "polimorfismo" in pregunta:
-        return "Concepto: El polimorfismo permite que distintas clases respondan al mismo método de manera diferente."
+# Inicia historial
+iniciar_historial()
 
-    # Generador de ejemplos
-    if "ejemplo de código de herencia" in pregunta:
-        return '''```java
-class Animal {
-    void hacerSonido() {
-        System.out.println("Sonido genérico");
-    }
-}
-class Perro extends Animal {
-    void hacerSonido() {
-        System.out.println("¡Guau!");
-    }
-}
-```'''
-    if "interfaz" in pregunta and "implemente" in pregunta:
-        return '''```java
-interface Volador {
-    void volar();
-}
+# Mostrar historial
+st.markdown('<div class="chat-box">', unsafe_allow_html=True)
+for i, (usuario, bot) in enumerate(st.session_state.historial):
+    st.markdown(f'<div class="user-msg">👤 Tú: {usuario}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="bot-msg">🤖 Bot: {bot}</div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
-class Pajaro implements Volador {
-    public void volar() {
-        System.out.println("El pájaro vuela");
-    }
-}
-```'''
+# Campo de entrada
+pregunta = st.text_input("Escribe tu pregunta sobre POO o cualquier tema:")
+if st.button("Enviar") and pregunta:
+    respuesta = responder(pregunta)
+    st.session_state.historial.append((pregunta, respuesta))
+    st.experimental_rerun()
 
-    # Análisis de código
-    if "{" in pregunta and "class" in pregunta:
-        return "**Análisis**: Parece que pegaste código. Este fragmento define una clase. Verifica sintaxis y estructura de métodos."
-
-    return "No encontré información relevante sobre esa pregunta. Intenta escribir otra duda relacionada con POO."
-
-# Mostrar respuesta
-if user_input:
-    st.markdown(responder(user_input))
