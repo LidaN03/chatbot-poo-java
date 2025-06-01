@@ -1,75 +1,71 @@
 import streamlit as st
-import requests
+from duckduckgo_search import DDGS
+import time
 
 st.set_page_config(page_title="ChatBot POO", layout="centered")
 st.markdown("""
     <style>
-    body, .stApp {
-        font-family: 'Arial Rounded MT Bold', sans-serif;
-        background-color: #f1f1f1;
+    body {
+        background-color: #f7f2fa;
     }
-    .chat-box {
+    .main {
         background-color: #ffffff;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        font-family: 'Segoe UI', sans-serif;
     }
-    .user-msg {
-        background-color: #d0e8ff;
-        padding: 8px;
-        border-radius: 10px;
-        margin-bottom: 8px;
+    .chat-bubble {
+        border-radius: 15px;
+        padding: 10px 20px;
+        margin: 10px 0;
+        max-width: 80%;
+        font-size: 16px;
     }
-    .bot-msg {
-        background-color: #eeeeee;
-        padding: 8px;
-        border-radius: 10px;
-        margin-bottom: 8px;
+    .user {
+        background-color: #d3cce3;
+        align-self: flex-end;
+        text-align: right;
+        margin-left: auto;
+    }
+    .bot {
+        background-color: #cfe2f3;
+        align-self: flex-start;
+        text-align: left;
+        margin-right: auto;
     }
     </style>
 """, unsafe_allow_html=True)
 
-st.image("robot_chatbot.png", width=100)
-st.title("🤖 ChatBot de POO y más")
+st.title("Asistente de POO con Java")
+st.subheader("Hazme preguntas sobre programación orientada a objetos, clases, herencia, ejemplos en Java y más.")
 
-# Historial de mensajes si no existe
-def iniciar_historial():
-    if "historial" not in st.session_state:
-        st.session_state.historial = []
+if "history" not in st.session_state:
+    st.session_state.history = []
 
-def buscar_duckduckgo(pregunta):
-    try:
-        url = f"https://api.duckduckgo.com/?q={pregunta}&format=json&no_redirect=1"
-        respuesta = requests.get(url)
-        datos = respuesta.json()
-        texto = datos.get("Abstract")
-        if texto:
-            return texto
-        else:
-            return "No encontré una respuesta directa, intenta reformular tu pregunta."
-    except Exception as e:
-        return f"Ocurrió un error al buscar: {e}"
+user_input = st.text_input("Escribe tu mensaje:", "")
 
-# Lógica general del chatbot
-def responder(pregunta):
-    pregunta = pregunta.lower()
-    respuesta = buscar_duckduckgo(pregunta)
-    return respuesta
+if st.button("Enviar") and user_input:
+    st.session_state.history.append(("user", user_input))
+    
+    # Simular búsqueda inteligente
+    respuesta = "Estoy buscando la mejor respuesta..."
+    with st.spinner("Pensando..."):
+        time.sleep(1.5)
+        try:
+            with DDGS() as ddgs:
+                resultados = list(ddgs.text(keywords=user_input, max_results=1))
+                if resultados:
+                    respuesta = resultados[0]["body"]
+                else:
+                    respuesta = "Lo siento, no encontré una respuesta clara. ¿Puedes reformular tu pregunta?"
+        except Exception as e:
+            respuesta = f"Ocurrió un error al buscar información: {str(e)}"
 
-# Inicia historial
-iniciar_historial()
+    st.session_state.history.append(("bot", respuesta))
 
-# Mostrar historial
-st.markdown('<div class="chat-box">', unsafe_allow_html=True)
-for i, (usuario, bot) in enumerate(st.session_state.historial):
-    st.markdown(f'<div class="user-msg">👤 Tú: {usuario}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="bot-msg">🤖 Bot: {bot}</div>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
-
-# Campo de entrada
-pregunta = st.text_input("Escribe tu pregunta sobre POO o cualquier tema:")
-if st.button("Enviar") and pregunta:
-    respuesta = responder(pregunta)
-    st.session_state.historial.append((pregunta, respuesta))
-    st.experimental_rerun()
+# Mostrar historial de chat
+for autor, mensaje in st.session_state.history:
+    clase = "user" if autor == "user" else "bot"
+    st.markdown(f'<div class="chat-bubble {clase}">{mensaje}</div>', unsafe_allow_html=True)
 
