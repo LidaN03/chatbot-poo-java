@@ -61,8 +61,8 @@ if "history" not in st.session_state:
     st.session_state.history = []
 
 def generar_codigo_java(prompt_usuario):
-    url = "https://api-inference.huggingface.co/models/bigcode/starcoder"
-    headers = {"Authorization": "Bearer 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"}  # Reemplaza con tu token válido
+    url = "https://api-inference.huggingface.co/models/Salesforce/codegen-350M-mono"
+    headers = {"Authorization": "Bearer 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"}  # Reemplaza con tu token válido
 
     prompt = f"// Java\n// {prompt_usuario}\npublic class "
 
@@ -124,7 +124,7 @@ def buscar_respuesta_clara(pregunta):
             if any(palabra in texto.lower() for palabra in ["una clase", "java", "herencia", "polimorfismo", "interfaz"]):
                 if len(texto) > 1000:
                     texto = texto[:1000].rsplit(".", 1)[0] + "."
-                return f" {texto}\n\nFuente: [{url}]({url})"
+                return f"{texto}\n\nFuente: [{url}]({url})"
         return "Lo siento, no encontré una respuesta clara en sitios confiables. ¿Puedes reformular tu pregunta?"
 
 user_input = st.text_input("Escribe tu mensaje:", "")
@@ -142,3 +142,4 @@ if st.button("Enviar") and user_input:
 for autor, mensaje in st.session_state.history:
     clase = "user" if autor == "user" else "bot"
     st.markdown(f'<div class="chat-bubble {clase}">{mensaje}</div>', unsafe_allow_html=True)
+
