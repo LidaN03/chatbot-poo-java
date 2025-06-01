@@ -66,9 +66,9 @@ def buscar_respuesta_clara(pregunta):
             url = r.get("href", "")
             texto = r.get("body", "").strip()
             if any(palabra in texto.lower() for palabra in ["una clase", "java", "herencia", "polimorfismo", "interfaz"]):
-                if len(texto) > 1000:
+                if len(texto) > 10000:
                     texto = texto[:1000].rsplit(".", 1)[0] + "."
-                return f"**Respuesta**: {texto}\n\nFuente: [{url}]({url})"
+                return f"{texto}\n\nFuente: [{url}]({url})"
         return "Lo siento, no encontré una respuesta clara en sitios confiables. ¿Puedes reformular tu pregunta?"
 
 user_input = st.text_input("Escribe tu mensaje:", "")
