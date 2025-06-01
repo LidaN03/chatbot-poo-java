@@ -79,7 +79,7 @@ def generar_codigo_java(prompt_usuario):
 def buscar_respuesta_clara(pregunta):
     if "ejemplo" in pregunta.lower() or "programa" in pregunta.lower():
         codigo = generar_codigo_java(pregunta)
-        return f"**Ejemplo de código generado:**\n```java\n{codigo}\n```"
+        return f"Ejemplo de código generado:\n```java\n{codigo}\n```"
 
     conceptos_directos = {
         "herencia": "La herencia en programación orientada a objetos permite que una clase herede atributos y métodos de otra clase.",
@@ -101,7 +101,7 @@ def buscar_respuesta_clara(pregunta):
             for r in resultados:
                 url = r.get("href", "")
                 if url:
-                    return f"**Respuesta**: {respuesta}\n\nFuente: [{url}]({url})"
+                    return f" {respuesta}\n\nFuente: [{url}]({url})"
 
     with DDGS() as ddgs:
         resultados = list(ddgs.text(keywords=pregunta, max_results=5))
@@ -111,7 +111,7 @@ def buscar_respuesta_clara(pregunta):
             if any(palabra in texto.lower() for palabra in ["una clase", "java", "herencia", "polimorfismo", "interfaz"]):
                 if len(texto) > 1000:
                     texto = texto[:1000].rsplit(".", 1)[0] + "."
-                return f"**Respuesta**: {texto}\n\nFuente: [{url}]({url})"
+                return f" {texto}\n\nFuente: [{url}]({url})"
         return "Lo siento, no encontré una respuesta clara en sitios confiables. ¿Puedes reformular tu pregunta?"
 
 user_input = st.text_input("Escribe tu mensaje:", "")
