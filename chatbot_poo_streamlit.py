@@ -6,7 +6,7 @@ st.set_page_config(page_title="ChatBot POO", layout="centered")
 st.markdown("""
     <style>
     body {
-        background-color: #f7f2fa;
+        background-color: #f0f4f8;
     }
     .main {
         background-color: #ffffff;
@@ -23,19 +23,21 @@ st.markdown("""
         font-size: 16px;
     }
     .user {
-        background-color: #d3cce3;
+        background-color: #e6f7ff;
         align-self: flex-end;
         text-align: right;
         margin-left: auto;
     }
     .bot {
-        background-color: #cfe2f3;
+        background-color: #fff0f6;
         align-self: flex-start;
         text-align: left;
         margin-right: auto;
     }
     </style>
 """, unsafe_allow_html=True)
+
+st.image("robot_chatbot.png", width=120)
 
 st.title("Asistente de POO con Java")
 st.subheader("Hazme preguntas sobre programación orientada a objetos, clases, herencia, ejemplos en Java y más.")
@@ -47,7 +49,7 @@ user_input = st.text_input("Escribe tu mensaje:", "")
 
 if st.button("Enviar") and user_input:
     st.session_state.history.append(("user", user_input))
-    
+
     # Simular búsqueda inteligente
     respuesta = "Estoy buscando la mejor respuesta..."
     with st.spinner("Pensando..."):
@@ -63,6 +65,11 @@ if st.button("Enviar") and user_input:
             respuesta = f"Ocurrió un error al buscar información: {str(e)}"
 
     st.session_state.history.append(("bot", respuesta))
+
+# Mostrar historial de chat
+for autor, mensaje in st.session_state.history:
+    clase = "user" if autor == "user" else "bot"
+    st.markdown(f'<div class="chat-bubble {clase}">{mensaje}</div>', unsafe_allow_html=True)
 
 # Mostrar historial de chat
 for autor, mensaje in st.session_state.history:
