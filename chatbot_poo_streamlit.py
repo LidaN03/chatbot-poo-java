@@ -60,30 +60,38 @@ if "history" not in st.session_state:
     st.session_state.history = []
 
 def buscar_respuesta_clara(pregunta):
-    sitios_confiables = [
-        "campusmvp.es",
-        "genbeta.com",
-        "alianza.bunam.unam.mx",
-        "webdesigncusco.com"
-    ]
-    
+    conceptos_directos = {
+        "herencia": "La herencia en programación orientada a objetos permite que una clase herede atributos y métodos de otra clase.",
+        "polimorfismo": "El polimorfismo permite que objetos de diferentes clases sean tratados como objetos de una clase común.",
+        "encapsulamiento": "El encapsulamiento consiste en ocultar los detalles internos de un objeto y exponer solo lo necesario a través de métodos públicos.",
+        "abstracción": "La abstracción permite centrarse en los aspectos esenciales del objeto, ocultando los detalles no relevantes."
+    }
+
+    concepto = None
+    for clave in conceptos_directos:
+        if clave in pregunta.lower():
+            concepto = clave
+            break
+
+    if concepto:
+        respuesta = conceptos_directos[concepto]
+        with DDGS() as ddgs:
+            resultados = list(ddgs.text(keywords=f"{concepto} programación orientada a objetos", max_results=3))
+            for r in resultados:
+                url = r.get("href", "")
+                if url:
+                    return f"**Respuesta**: {respuesta}\n\nFuente: [{url}]({url})"
+
     with DDGS() as ddgs:
-        resultados = list(ddgs.text(keywords=pregunta, max_results=10))
+        resultados = list(ddgs.text(keywords=pregunta, max_results=5))
         for r in resultados:
             url = r.get("href", "")
             texto = r.get("body", "").strip()
-            dominio_valido = any(site in url for site in sitios_confiables)
-
-            if dominio_valido and any(palabra in texto.lower() for palabra in ["una clase", "java", "herencia", "polimorfismo", "interfaz"]):
+            if any(palabra in texto.lower() for palabra in ["una clase", "java", "herencia", "polimorfismo", "interfaz"]):
                 if len(texto) > 1000:
                     texto = texto[:1000].rsplit(".", 1)[0] + "."
-                return f"**Respuesta**: {texto}\n\n🔗 Fuente: [{url}]({url})"
-    
-    return "Lo siento, no encontré una respuesta clara en los sitios educativos confiables. ¿Puedes reformular tu pregunta?"
-
-    
-    return "Lo siento, no encontré una respuesta clara en los sitios educativos confiables. ¿Puedes reformular tu pregunta?"
-
+                return f"**Respuesta**: {texto}\n\nFuente: [{url}]({url})"
+        return "Lo siento, no encontré una respuesta clara en sitios confiables. ¿Puedes reformular tu pregunta?"
 
 user_input = st.text_input("Escribe tu mensaje:", "")
 
@@ -100,4 +108,3 @@ if st.button("Enviar") and user_input:
 for autor, mensaje in st.session_state.history:
     clase = "user" if autor == "user" else "bot"
     st.markdown(f'<div class="chat-bubble {clase}">{mensaje}</div>', unsafe_allow_html=True)
-
