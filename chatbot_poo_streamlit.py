@@ -3,9 +3,6 @@ import requests
 from duckduckgo_search import DDGS
 import time
 import spacy
-import subprocess
-import importlib.util
-
 import es_core_news_sm
 nlp = es_core_news_sm.load()
 
