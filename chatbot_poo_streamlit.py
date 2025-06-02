@@ -4,7 +4,6 @@ from duckduckgo_search import DDGS
 import spacy
 import time
 
-# Cargar modelo de lenguaje español
 nlp = spacy.load("es_core_news_sm")
 
 st.set_page_config(page_title="ChatBot POO", layout="centered")
