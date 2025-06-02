@@ -3,14 +3,16 @@ import requests
 from duckduckgo_search import DDGS
 import time
 import spacy
+import subprocess
+import importlib.util
 
-try:
-    nlp = spacy.load("es_core_news_sm")
-except OSError:
-    # Descargar el modelo si no está presente
-    from spacy.cli import download
-    download("es_core_news_sm")
-    nlp = spacy.load("es_core_news_sm")
+# Verificar si el modelo está instalado, si no, instalarlo
+modelo = "es_core_news_sm"
+if importlib.util.find_spec(modelo) is None:
+    subprocess.run(["python", "-m", "spacy", "download", modelo])
+
+# Cargar modelo
+nlp = spacy.load(modelo)
 
 
 st.set_page_config(page_title="ChatBot POO", layout="centered")
