@@ -2,18 +2,21 @@ import streamlit as st
 import requests
 from duckduckgo_search import DDGS
 import time
-import spacy
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+import string
 
-# Cargar el modelo spaCy español
-try:
-    nlp = spacy.load("es_core_news_sm")
-except OSError:
-    st.error("El modelo 'es_core_news_sm' no está instalado.")
-    st.stop()
+# Descargar recursos necesarios de NLTK
+nltk.download('punkt')
+nltk.download('stopwords')
+
+# Configurar stopwords en español
+stop_words = set(stopwords.words('spanish'))
 
 st.set_page_config(page_title="ChatBot POO", layout="centered")
 
-# Estilo visual básico (puedes personalizarlo)
+# Estilo visual
 st.markdown("""<style>
 .chat-bubble {padding: 10px; border-radius: 10px; margin-bottom: 10px;}
 .chat-bubble.user {background-color: #DCF8C6; text-align: right;}
@@ -28,7 +31,6 @@ st.subheader("Pregúntame sobre clases, herencia, ejemplos de código en Java y 
 if "history" not in st.session_state:
     st.session_state.history = []
 
-# Diccionario de conceptos
 conceptos_directos = {
     "herencia": "La herencia en POO permite que una clase herede atributos y métodos de otra.",
     "polimorfismo": "El polimorfismo permite que objetos de distintas clases sean tratados como uno solo.",
@@ -36,7 +38,6 @@ conceptos_directos = {
     "abstracción": "La abstracción permite centrarse en los aspectos esenciales de un objeto."
 }
 
-# Diccionario de ejemplos de código
 codigos_java = {
     "herencia": """java
 class Animal {
@@ -85,11 +86,12 @@ public class Principal {
 """
 }
 
-# FUNCIONES DE PLN
+# --- FUNCIONES DE PLN ---
 
 def obtener_palabras_clave(pregunta):
-    doc = nlp(pregunta.lower())
-    return [token.lemma_ for token in doc if not token.is_stop and not token.is_punct]
+    tokens = word_tokenize(pregunta.lower(), language='spanish')
+    palabras = [t for t in tokens if t not in stop_words and t not in string.punctuation]
+    return palabras
 
 def entender_tema_usuario(pregunta):
     palabras_clave = obtener_palabras_clave(pregunta)
@@ -132,7 +134,6 @@ def buscar_respuesta_clara(pregunta):
                     if url:
                         return f"*Respuesta*: {respuesta}\n\nFuente: [{url}]({url})"
 
-    # Último recurso: búsqueda general
     with DDGS() as ddgs:
         resultados = list(ddgs.text(keywords=pregunta, max_results=5))
         for r in resultados:
@@ -143,7 +144,7 @@ def buscar_respuesta_clara(pregunta):
 
     return "Lo siento, no encontré una respuesta clara. ¿Puedes reformular tu pregunta?"
 
-# INTERFAZ DEL USUARIO
+# INTERFAZ
 
 user_input = st.text_input("Escribe tu mensaje:", "")
 
@@ -158,3 +159,4 @@ if st.button("Enviar") and user_input:
 for autor, mensaje in st.session_state.history:
     clase = "user" if autor == "user" else "bot"
     st.markdown(f'<div class="chat-bubble {clase}">{mensaje}</div>', unsafe_allow_html=True)
+
