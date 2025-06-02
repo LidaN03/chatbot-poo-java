@@ -3,13 +3,15 @@ import requests
 from duckduckgo_search import DDGS
 import time
 import spacy
-import es_core_news_sm  # Importamos el modelo como módulo
 
-# Cargar el modelo directamente
-nlp = es_core_news_sm.load()
+# Cargar el modelo spaCy español
+try:
+    nlp = spacy.load("es_core_news_sm")
+except OSError:
+    st.error("El modelo 'es_core_news_sm' no está instalado.")
+    st.stop()
 
 st.set_page_config(page_title="ChatBot POO", layout="centered")
-
 
 # Estilo visual básico (puedes personalizarlo)
 st.markdown("""<style>
