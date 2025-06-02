@@ -1,10 +1,17 @@
 import streamlit as st
 import requests
 from duckduckgo_search import DDGS
-import spacy
 import time
+import spacy
 
-nlp = spacy.load("es_core_news_sm")
+try:
+    nlp = spacy.load("es_core_news_sm")
+except OSError:
+    # Descargar el modelo si no está presente
+    from spacy.cli import download
+    download("es_core_news_sm")
+    nlp = spacy.load("es_core_news_sm")
+
 
 st.set_page_config(page_title="ChatBot POO", layout="centered")
 
