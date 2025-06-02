@@ -62,7 +62,7 @@ if "history" not in st.session_state:
 
 # Ejemplos predefinidos de código Java
 codigos_java = {
-    "herencia": """java
+    "herencia": """```java
 class Animal {
     void hacerSonido() {
         System.out.println("Sonido genérico");
@@ -74,8 +74,17 @@ class Perro extends Animal {
         System.out.println("Guau!");
     }
 }
-""",
-    "interfaz": """java
+
+public class Main {
+    public static void main(String[] args) {
+        Animal a = new Animal();
+        Perro p = new Perro();
+        a.hacerSonido(); // Sonido genérico
+        p.hacerSonido(); // Guau!
+    }
+}
+```""",
+    "interfaz": """```java
 interface Vehiculo {
     void conducir();
 }
@@ -85,8 +94,15 @@ class Coche implements Vehiculo {
         System.out.println("El coche está en marcha.");
     }
 }
-""",
-    "clase abstracta": """java
+
+public class Main {
+    public static void main(String[] args) {
+        Vehiculo v = new Coche();
+        v.conducir(); // El coche está en marcha.
+    }
+}
+```""",
+    "clase abstracta": """```java
 abstract class Figura {
     abstract void dibujar();
 }
@@ -96,8 +112,15 @@ class Circulo extends Figura {
         System.out.println("Dibujando un círculo");
     }
 }
-""",
-    "sobrecarga": """java
+
+public class Main {
+    public static void main(String[] args) {
+        Figura f = new Circulo();
+        f.dibujar(); // Dibujando un círculo
+    }
+}
+```""",
+    "sobrecarga": """```java
 class Calculadora {
     int sumar(int a, int b) {
         return a + b;
@@ -106,16 +129,23 @@ class Calculadora {
     double sumar(double a, double b) {
         return a + b;
     }
+
+    public static void main(String[] args) {
+        Calculadora calc = new Calculadora();
+        System.out.println(calc.sumar(3, 4));      // 7
+        System.out.println(calc.sumar(2.5, 4.3));  // 6.8
+    }
 }
-""",
-    "main": """java
+```""",
+    "main": """```java
 public class Principal {
     public static void main(String[] args) {
         System.out.println("Hola Mundo");
     }
 }
-"""
+```"""
 }
+
 
 def generar_codigo_java_local(pregunta):
     for clave in codigos_java:
