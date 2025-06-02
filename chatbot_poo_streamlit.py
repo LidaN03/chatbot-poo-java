@@ -2,26 +2,55 @@ import streamlit as st
 import requests
 from duckduckgo_search import DDGS
 import time
-import nltk
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-import string
-
-# Descargar recursos necesarios de NLTK
-nltk.download('punkt')
-nltk.download('stopwords')
-
-# Configurar stopwords en español
-stop_words = set(stopwords.words('spanish'))
 
 st.set_page_config(page_title="ChatBot POO", layout="centered")
-
-# Estilo visual
-st.markdown("""<style>
-.chat-bubble {padding: 10px; border-radius: 10px; margin-bottom: 10px;}
-.chat-bubble.user {background-color: #DCF8C6; text-align: right;}
-.chat-bubble.bot {background-color: #F1F0F0; text-align: left;}
-</style>""", unsafe_allow_html=True)
+st.markdown("""
+    <style>
+    body {
+        background-color: #fef6f9;
+    }
+    .main {
+        background-color: #ffffff;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        font-family: 'Segoe UI', sans-serif;
+    }
+    .chat-bubble {
+        border-radius: 15px;
+        padding: 10px 20px;
+        margin: 10px 0;
+        max-width: 80%;
+        font-size: 16px;
+        color: #333;
+    }
+    .user {
+        background-color: #d0f0f3;
+        align-self: flex-end;
+        text-align: right;
+        margin-left: auto;
+    }
+    .bot {
+        background-color: #fce6ef;
+        align-self: flex-start;
+        text-align: left;
+        margin-right: auto;
+    }
+    .stButton>button {
+        background-color: #ff8fab;
+        color: white;
+        font-weight: bold;
+        border-radius: 8px;
+        border: none;
+        padding: 10px 20px;
+    }
+    .stTextInput>div>input {
+        border-radius: 10px;
+        border: 1px solid #ffb6c1;
+        padding: 10px;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 st.image("robot_chatbot.png", width=120)
 
@@ -31,13 +60,7 @@ st.subheader("Pregúntame sobre clases, herencia, ejemplos de código en Java y 
 if "history" not in st.session_state:
     st.session_state.history = []
 
-conceptos_directos = {
-    "herencia": "La herencia en POO permite que una clase herede atributos y métodos de otra.",
-    "polimorfismo": "El polimorfismo permite que objetos de distintas clases sean tratados como uno solo.",
-    "encapsulamiento": "El encapsulamiento oculta el estado interno de un objeto y expone solo lo necesario.",
-    "abstracción": "La abstracción permite centrarse en los aspectos esenciales de un objeto."
-}
-
+# Ejemplos predefinidos de código Java
 codigos_java = {
     "herencia": """java
 class Animal {
@@ -45,6 +68,7 @@ class Animal {
         System.out.println("Sonido genérico");
     }
 }
+
 class Perro extends Animal {
     void hacerSonido() {
         System.out.println("Guau!");
@@ -55,6 +79,7 @@ class Perro extends Animal {
 interface Vehiculo {
     void conducir();
 }
+
 class Coche implements Vehiculo {
     public void conducir() {
         System.out.println("El coche está en marcha.");
@@ -65,6 +90,7 @@ class Coche implements Vehiculo {
 abstract class Figura {
     abstract void dibujar();
 }
+
 class Circulo extends Figura {
     void dibujar() {
         System.out.println("Dibujando un círculo");
@@ -73,8 +99,13 @@ class Circulo extends Figura {
 """,
     "sobrecarga": """java
 class Calculadora {
-    int sumar(int a, int b) { return a + b; }
-    double sumar(double a, double b) { return a + b; }
+    int sumar(int a, int b) {
+        return a + b;
+    }
+
+    double sumar(double a, double b) {
+        return a + b;
+    }
 }
 """,
     "main": """java
@@ -86,76 +117,65 @@ public class Principal {
 """
 }
 
-# --- FUNCIONES DE PLN ---
-
-def obtener_palabras_clave(pregunta):
-    tokens = word_tokenize(pregunta.lower(), language='spanish')
-    palabras = [t for t in tokens if t not in stop_words and t not in string.punctuation]
-    return palabras
-
-def entender_tema_usuario(pregunta):
-    palabras_clave = obtener_palabras_clave(pregunta)
-    mejor_tema = None
-    mayor_coincidencias = 0
-
-    for tema in conceptos_directos:
-        coincidencias = sum(1 for palabra in palabras_clave if palabra in tema.lower())
-        if coincidencias > mayor_coincidencias:
-            mejor_tema = tema
-            mayor_coincidencias = coincidencias
-
-    return mejor_tema
-
-def detectar_intencion(pregunta):
-    pregunta = pregunta.lower()
-    if any(p in pregunta for p in ["ejemplo", "código", "programa"]):
-        return "codigo"
-    if any(p in pregunta for p in ["qué es", "define", "explica", "significa"]):
-        return "definicion"
-    return "otro"
+def generar_codigo_java_local(pregunta):
+    for clave in codigos_java:
+        if clave in pregunta.lower():
+            return codigos_java[clave]
+    return None
 
 def buscar_respuesta_clara(pregunta):
-    tema = entender_tema_usuario(pregunta)
-    intencion = detectar_intencion(pregunta)
-
-    if intencion == "codigo":
-        if tema and tema in codigos_java:
-            return f"*Ejemplo de código Java sobre {tema}:*\n{codigos_java[tema]}"
+    if "ejemplo" in pregunta.lower() or "programa" in pregunta.lower():
+        codigo = generar_codigo_java_local(pregunta)
+        if codigo:
+            return f"*Ejemplo de código generado:*\n{codigo}"
         else:
-            return "Lo siento, no tengo un ejemplo específico para eso. Prueba con 'interfaz' o 'sobrecarga'."
+            return "Lo siento, no tengo un ejemplo para eso aún. Prueba con 'herencia' o 'interfaz'."
 
-    if intencion == "definicion":
-        if tema and tema in conceptos_directos:
-            respuesta = conceptos_directos[tema]
-            with DDGS() as ddgs:
-                resultados = list(ddgs.text(keywords=f"{tema} programación orientada a objetos", max_results=3))
-                for r in resultados:
-                    url = r.get("href", "")
-                    if url:
-                        return f"*Respuesta*: {respuesta}\n\nFuente: [{url}]({url})"
+    conceptos_directos = {
+        "herencia": "La herencia en programación orientada a objetos permite que una clase herede atributos y métodos de otra clase.",
+        "polimorfismo": "El polimorfismo permite que objetos de diferentes clases sean tratados como objetos de una clase común.",
+        "encapsulamiento": "El encapsulamiento consiste en ocultar los detalles internos de un objeto y exponer solo lo necesario a través de métodos públicos.",
+        "abstracción": "La abstracción permite centrarse en los aspectos esenciales del objeto, ocultando los detalles no relevantes."
+    }
+
+    concepto = None
+    for clave in conceptos_directos:
+        if clave in pregunta.lower():
+            concepto = clave
+            break
+
+    if concepto:
+        respuesta = conceptos_directos[concepto]
+        with DDGS() as ddgs:
+            resultados = list(ddgs.text(keywords=f"{concepto} programación orientada a objetos", max_results=3))
+            for r in resultados:
+                url = r.get("href", "")
+                if url:
+                    return f"*Respuesta*: {respuesta}\n\nFuente: [{url}]({url})"
 
     with DDGS() as ddgs:
         resultados = list(ddgs.text(keywords=pregunta, max_results=5))
         for r in resultados:
             url = r.get("href", "")
             texto = r.get("body", "").strip()
-            if any(k in texto.lower() for k in conceptos_directos.keys()):
-                return f"*Respuesta*: {texto[:800]}...\n\nFuente: [{url}]({url})"
-
-    return "Lo siento, no encontré una respuesta clara. ¿Puedes reformular tu pregunta?"
-
-# INTERFAZ
+            if any(palabra in texto.lower() for palabra in ["una clase", "java", "herencia", "polimorfismo", "interfaz"]):
+                if len(texto) > 1000:
+                    texto = texto[:1000].rsplit(".", 1)[0] + "."
+                return f"*Respuesta*: {texto}\n\nFuente: [{url}]({url})"
+        return "Lo siento, no encontré una respuesta clara en sitios confiables. ¿Puedes reformular tu pregunta?"
 
 user_input = st.text_input("Escribe tu mensaje:", "")
 
 if st.button("Enviar") and user_input:
     st.session_state.history.append(("user", user_input))
-    with st.spinner("Analizando tu mensaje..."):
+
+    with st.spinner("Buscando la mejor respuesta en la web..."):
         time.sleep(1)
         respuesta = buscar_respuesta_clara(user_input)
+
     st.session_state.history.append(("bot", respuesta))
 
-# Mostrar conversación
+# Mostrar historial de chat
 for autor, mensaje in st.session_state.history:
     clase = "user" if autor == "user" else "bot"
     st.markdown(f'<div class="chat-bubble {clase}">{mensaje}</div>', unsafe_allow_html=True)
