@@ -6,14 +6,8 @@ import spacy
 import subprocess
 import importlib.util
 
-# Verificar si el modelo está instalado, si no, instalarlo
-modelo = "es_core_news_sm"
-if importlib.util.find_spec(modelo) is None:
-    subprocess.run(["python", "-m", "spacy", "download", modelo])
-
-# Cargar modelo
-nlp = spacy.load(modelo)
-
+import es_core_news_sm
+nlp = es_core_news_sm.load()
 
 st.set_page_config(page_title="ChatBot POO", layout="centered")
 
